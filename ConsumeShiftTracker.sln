@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32328.378
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsumeShiftTracker", "ConsumeShiftTracker\ConsumeShiftTracker.csproj", "{7E0FE2A9-BADC-4453-8638-7B8673A71AE4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7E0FE2A9-BADC-4453-8638-7B8673A71AE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E0FE2A9-BADC-4453-8638-7B8673A71AE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E0FE2A9-BADC-4453-8638-7B8673A71AE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E0FE2A9-BADC-4453-8638-7B8673A71AE4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {73006050-AD67-494D-AFB8-F8D431261EF6}
+	EndGlobalSection
+EndGlobal
