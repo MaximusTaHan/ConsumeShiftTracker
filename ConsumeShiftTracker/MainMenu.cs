@@ -1,8 +1,10 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using ConsumeShiftTracker;
+using ConsumeShiftTracker.Models;
 using System.Text.RegularExpressions;
-
 internal class MainMenu
 {
+    //Hour minute regex string
     string pattern = @"^(?:(?:([01]?\d|2[0-3]):)?([0-5]?\d))$";
     internal async Task Menu()
     {
@@ -37,29 +39,91 @@ internal class MainMenu
                 case "2":
                     await ProcessCreate();
                     break;
-                    //case "3":
-                    //    ProcessDelete();
-                    //    break;
-                    //case "4":
-                    //    ProcessUpdate();
-                    //    break;
+                case "3":
+                    await ProcessUpdate();
+                    break;
+                case "4":
+                    await ProcessDelete();
+                    break;
             }
+        }
+    }
+
+    private async Task ProcessUpdate()
+    {
+        var ShiftList = await ShiftController.GetShifts();
+        bool found = false;
+        ShiftVisualizer.ShowShifts(ShiftList);
+        Console.WriteLine("What shift Entry would you like to Update? (By ID). (Or 0 to return to Main Menu)");
+        string input = Console.ReadLine();
+
+        while (found == false && int.TryParse(input, out int num))
+        {
+            if (num == 0)
+            {
+                await Menu();
+            }
+            foreach (var shift in ShiftList)
+            {
+                if (num == shift.shiftId)
+                {
+                    found = true;
+                    var UpdateShiftDTO = await SetShiftValues();
+                    UpdateShiftDTO.shiftId = num;
+                    await ShiftController.UpdateShift(UpdateShiftDTO);
+                }
+            }
+            Console.WriteLine("Please enter an Existing ID number");
+            input = Console.ReadLine();
+        }
+    }
+
+    private async Task ProcessDelete()
+    {
+        var ShiftList = await ShiftController.GetShifts();
+        bool found = false;
+        ShiftVisualizer.ShowShifts(ShiftList);
+        Console.WriteLine("What shift Entry would you like to Delete? (By ID). (Or 0 to return to Main Menu)");
+        string input = Console.ReadLine();
+
+        while (found == false && int.TryParse(input, out int num))
+        {
+            if(num == 0)
+            {
+               await Menu();
+            }
+            foreach (var shift in ShiftList)
+            {
+                if(num == shift.shiftId)
+                {
+                    found = true;
+                    await ShiftController.DeleteShift(num);
+                    await Menu();
+                }
+            }
+            Console.WriteLine("Please enter an Existing ID number");
+            input = Console.ReadLine();
         }
     }
 
     private async Task ProcessCreate()
     {
-        Console.WriteLine("\nPlease enter your Starting time (HH:mm)");
-        string start = Console.ReadLine();
+        var CreateShiftDTO = await SetShiftValues();
 
-        CheckHourMinute(start);
+        await ShiftController.CreateShift(CreateShiftDTO);
+    }
 
-        Console.WriteLine("\nPlease enter your End time (HH:mm)");
-        string end = Console.ReadLine();
+    private async Task<Shift> SetShiftValues()
+    {
+        Console.WriteLine("\nPlease enter your Starting time (HH:mm). (Type 0 to return to Main Menu)");
 
-        CheckHourMinute(end);
+        string start = await CheckHourMinute(Console.ReadLine());
+
+        Console.WriteLine("\nPlease enter your End time (HH:mm). (Type 0 to return to Main Menu)");
+        string end = await CheckHourMinute(Console.ReadLine());
+
         // Create a check for catching if start time is later than end time
-        var dateTimeStart = DateTime.Now.ToShortDateString() + " " +  start;
+        var dateTimeStart = DateTime.Now.ToShortDateString() + " " + start;
         var dateTimeEnd = DateTime.Now.ToShortDateString() + " " + end;
         var finalStart = DateTime.Parse(dateTimeStart);
         var finalEnd = DateTime.Parse(dateTimeEnd);
@@ -67,7 +131,15 @@ internal class MainMenu
         var minutes = CalculateMinutes(finalStart, finalEnd);
         var pay = CalculatePay(minutes);
 
-        await ShiftController.CreateShift(finalStart, finalEnd, minutes, pay);
+        Shift shift = new Shift();
+        {
+            shift.start = finalStart;
+            shift.end = finalEnd;
+            shift.minutes = minutes;
+            shift.pay = pay;
+            shift.location = "";
+        }
+        return shift;
     }
 
     private decimal CalculatePay(decimal minutes)
@@ -84,19 +156,26 @@ internal class MainMenu
         return (decimal)ts.TotalMinutes;
     }
 
-    private void CheckHourMinute(string? input)
+    private async Task<string> CheckHourMinute(string? input)
     {
         Regex regex = new Regex(pattern);
 
+        if (input == "0")
+            await Menu();
+
         while (!regex.IsMatch(input))
         {
-            Console.WriteLine("Please enter the correct format (HH:mm)");
+            Console.WriteLine("Please enter the correct format (HH:mm). (Type 0 to return to Main Menu)");
             input = Console.ReadLine();
+            if (input == "0")
+                await Menu();
         }
+        return input;
     }
 
     private async Task ProcessGet()
     {
-        await ShiftController.GetShifts();
+        var shiftList = await ShiftController.GetShifts();
+        ShiftVisualizer.ShowShifts(shiftList);
     }
 }

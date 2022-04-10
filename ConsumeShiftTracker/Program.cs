@@ -8,21 +8,4 @@ class Program
         MainMenu mainMenu = new();
         await mainMenu.Menu();
     }
-    //private static readonly HttpClient client = new HttpClient();
-    //static async Task Main(string[] args)
-    //{
-    //    await ProcessGet();
-    //}
-
-    //private static async Task ProcessGet()
-    //{
-    //    client.DefaultRequestHeaders.Accept.Clear();
-    //    client.DefaultRequestHeaders.Accept.Add(
-    //        new MediaTypeWithQualityHeaderValue("application/json"));
-
-    //    var stringTask = client.GetStringAsync("https://localhost:7029/api/Shifts");
-
-    //    var msg = await stringTask;
-    //    Console.Write(msg);
-    //}
 }

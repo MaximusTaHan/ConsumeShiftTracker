@@ -3,41 +3,65 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 using ConsumeShiftTracker.Models;
+using Newtonsoft.Json;
 
 internal class ShiftController
 {
-    private static readonly HttpClient client = new HttpClient();
-    internal static async Task GetShifts()
+    internal static async Task<List<Shift>> GetShifts()
     {
-        client.DefaultRequestHeaders.Accept.Clear();
-        client.DefaultRequestHeaders.Accept.Add(
-            new MediaTypeWithQualityHeaderValue("application/json"));
+        using var client = new HttpClient();
+        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-        var stringTask = client.GetStringAsync("https://localhost:7029/api/Shifts");
+        HttpResponseMessage response = client.GetAsync("https://localhost:7029/api/Shifts").Result;
 
-        var msg = await stringTask;
-        Console.Write(msg);
+        if(response.IsSuccessStatusCode)
+        {
+            var resp = response.Content.ReadAsStringAsync().Result;
+            List<Shift> shifts = JsonConvert.DeserializeObject<List<Shift>>(resp);
+            return shifts;
+        }
+        else
+        {
+            Console.WriteLine("{0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
+        }
+
+        return null;
     }
 
-    internal static async Task CreateShift(DateTime dateTimeStart, DateTime dateTimeEnd, decimal minutes, decimal pay)
+    internal static async Task CreateShift(Shift shift)
     {
-        Shift shift = new()
-        {
-            shiftId = 0,
-            start = dateTimeStart,
-            end = dateTimeEnd,
-            minutes = minutes,
-            pay = pay,
-            location = ""
-        };
-
-        var shiftJson = JsonSerializer.Serialize(shift);
-        var data = new StringContent(shiftJson, Encoding.UTF8, "application/json");
-        var url = "https://localhost:7029/api/Shifts";
 
         using var client = new HttpClient();
-        var response = await client.PostAsync(url, data);
+        var response = client.PostAsJsonAsync("https://localhost:7029/api/Shifts", shift).Result;
 
+        if (response.IsSuccessStatusCode)
+            Console.WriteLine("Success");
+        else
+            Console.WriteLine("Error");
+
+    }
+
+    internal static async Task DeleteShift(int num)
+    {
+        using var client = new HttpClient();
+        var response = client.DeleteAsync($"https://localhost:7029/api/Shifts/{num}").Result;
+        if (response.IsSuccessStatusCode)
+            Console.WriteLine("Success");
+
+        else
+            Console.WriteLine("Error");
+    }
+
+    internal static async Task UpdateShift(Shift updateShiftDTO)
+    {
+        using var client = new HttpClient();
+        var response = client.PutAsJsonAsync($"https://localhost:7029/api/Shifts/{updateShiftDTO.shiftId}", updateShiftDTO).Result;
+        if (response.IsSuccessStatusCode)
+            Console.WriteLine("Success");
+
+        else
+            Console.WriteLine("Error");
     }
 }
